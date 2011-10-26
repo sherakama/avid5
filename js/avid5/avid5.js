@@ -113,9 +113,7 @@
        this._defaults = defaults;
        this._name = pluginName;
 
-       this.init();
-             
-       
+       this.init();       
    }
    
 
@@ -128,8 +126,9 @@
        this.instanceID = $.avid5.instance_count;
        $.avid5.instance_container.push(this);
        $.avid5.instance_count++; // increment the counter
-                
-              
+
+       $(this.element).data('avid5', this); // store for later
+
        // Resize The element
        $(this.element).css({
          height: this.options.height + "px", 
@@ -190,12 +189,6 @@
      .attr("id", 'video-' + $.avid5.instance_count)
      .attr('class', 'video');
      
-     var hiddenInstanceId = $("<input />")
-     .attr('type','hidden')
-     .attr('class', 'instanceID')
-     .attr('value', $.avid5.instance_count);
-     
-     
      // Autoplay > moved to video events in play_loop
      // if(this.options.autoplay) {
      //   video.attr('autoplay','true'); 
@@ -208,8 +201,7 @@
        // add it to the video tag
        video.append(vidsource);  
      });
-     
-
+    
      
      // Add it to the dom!
      var elem = $(this.element)
@@ -218,27 +210,17 @@
      elem.append(outputCanvas);
      elem.append(bufferCanvas);
      elem.append(video);
-     elem.append(hiddenInstanceId);
-     
-     // Add some more info
-     outputCanvas.instanceID = this.instanceID;
-     video.instanceID = this.instanceID;
      
      // store references for use later
      this.outputcanvas = outputCanvas;
      this.buffercanvas = bufferCanvas;
      this.videoelem = video;
-     
 
      // Start the loop
     this.play_loop(); 
     
     // Event Handlers
     this.html5_setup_event_handlers()
-    
-    
-    
-
      
    };
    
@@ -278,29 +260,18 @@
         }
                 
         // add play listenter to the video
-        video.addEventListener('play', function() {
-         // console.log("PLAY LOOP");
-          clearInterval(this.process_interval);
-          this.process_interval = setInterval(function() {
-            var instance = $.avid5.get_instance(video.instanceID);
-            instance.process_frame();
-//            instance.check_loop();
-          }, 35);
-        }, false);
+        video.addEventListener('play', this.video_listener_loop_play, false);
 
 
         // Firefox doesn't support looping video, so we emulate it this way
-        video.addEventListener('ended', this.video_listener_ended, false);
+        video.addEventListener('ended', this.video_listener_loop_ended, false);
         
         
        // add pause/stop listenter to the video
-        video.addEventListener('pause', function() {
-           clearInterval(this.process_interval);
-        }, false);
+        // video.addEventListener('pause', function() {
+        // }, false);
         
         
-        // Should probably add a seek here
-        //video.play();
         
       } 
       else 
@@ -317,11 +288,73 @@
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    avid5.prototype.video_listener_ended = function() {
-      
-      console.log('ended');
+  /**
+   *
+   *
+   **/
+
+    avid5.prototype.video_listener_loop_ended = function() {
+      // Nothing so far
+      console.log("ENDED");
       
     }
+
+    /**
+    *
+    *
+    **/
+    
+    avid5.prototype.video_listener_loop_play = function() {
+        console.log('PLAY');    
+
+        var instance = $(this).parent().data('avid5');
+        clearInterval(instance.process_interval);
+        instance.process_interval = setInterval(function() {
+          instance.process_frame();
+          instance.check_loop();
+        }, 35);
+        
+    }
+
+    /**
+     * 
+     *
+     **/
+
+     avid5.prototype.video_listener_full_play = function() {
+         console.log('PLAY FULL');    
+         // Setup the process interval again
+         var instance = $(this).parent().data('avid5');
+         clearInterval(instance.process_interval);
+         instance.process_interval = setInterval(function() {
+           instance.process_frame();
+         }, 35);
+
+         // Create the callback action timer
+         setTimeout(instance.click_action_default_callback, instance.options.action_callback_delay);
+
+     }
+
+     /**
+      * 
+      *
+      **/
+
+      avid5.prototype.video_listener_full_ended = function() {
+        console.log('ENDED FULL');    
+
+      }
+
+
+     /**
+     * 
+     *
+     **/
+
+     avid5.prototype.click_action_default_callback = function() {
+        console.log('DO CALLBACK');    
+        $("body").css({background:'#F0F'});
+      }
 
 
     /**
@@ -339,7 +372,8 @@
 
       buffer.drawImage(video, 0, 0);
 
-      // this can be done without alphaData, except in Firefox which doesn't like it when image is bigger than the canvas
+      // this can be done without alphaData, except in Firefox which doesn't like 
+      // it when image is bigger than the canvas
       var	image = buffer.getImageData(0, 0, width, height),
       imageData = image.data,
       alphaData = buffer.getImageData(0, height, width, height).data;
@@ -380,19 +414,31 @@
     avid5.prototype.html5_setup_event_handlers = function() {
             
      var outputCanvas = this.outputcanvas[0];
-         outputCanvas.instanceID = this.instanceID;
                
       // CLICK HANDLING
       this.outputcanvas.click(function(e){
         e.preventDefault();
-        var instance = $.avid5.get_instance(outputCanvas.instanceID);
-        var video = instance.videoelem[0];      
-  
-        // remove the loop intervals and video events        
-        // clearInterval(video.process_interval);
         
-        video.removeEventListener('ended', this.video_listener_ended, false);        
+        var instance = $(this).parent().data('avid5');               
+        var video = instance.videoelem[0];      
+        
+        // temporarily pause the video
+        video.pause();
+        
+        // remove the loop intervals and video events        
+        clearInterval(instance.process_interval);
+        
+        // Remove the loop event handlers
+        video.removeEventListener('ended', instance.video_listener_loop_ended, false);        
+        video.removeEventListener('play', instance.video_listener_loop_play, false);
 
+        // Add in the playthrough!
+        video.addEventListener('play', instance.video_listener_full_play, false);
+        video.addEventListener('ended', instance.video_listener_full_ended, false);
+        
+        // Resume playing
+        video.play();
+        
       });
       
       
