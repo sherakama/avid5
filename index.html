@@ -21,59 +21,60 @@
   <script src="js/jquery.1.4.4.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="js/modernizr.2.0.6.cust.min.js"></script>
   <script src="js/swfobject.js"></script>
-  <script src="js/avid5/avid5.js"></script>
-  
+  <script src="js/avid5/avid5.js"></script>  
   <script type="text/javascript" charset="utf-8">
     $(document).ready(function(){
     
+    
       // USAGE
-      $("#vid1").avid5(
-        {
-          videos: { 
-             0 : { path: "media/compressed.webm", codec: "video/webm" }
-            ,1 : { path: "media/compressed.ogv", codec: "video/ogg" }
-            ,2 : { path: "media/compressed.mp4", codec: "video/mp4" }                     
-          }
-          ,width: 480
-          ,height: 244
-          ,video_loop_end: 1000
-          ,video_loop_start: 500 
-          ,autoplay: false
-        }
-      );
-      
-      
-      
-      
-      $("#vid2").avid5(
-        {
-          videos: { 
-             0 : { path: "media/compressed.webm", codec: "video/webm" }
-            ,1 : { path: "media/compressed.ogv", codec: "video/ogg" }
-            ,2 : { path: "media/compressed.mp4", codec: "video/mp4" }
-          }
-          ,width: 480
-          ,height: 244
-          ,video_loop_end: 2000
-          ,video_loop_start: 0
-          ,action_img_path: "img/success.jpg"
-          ,action_url_path: "http://www.google.com/"
-          ,callback: function() {
-            $("#vid2").css({border: "dashed 2px #FF00FF"});
-            $("#vid2").animate({left: "-150px"}, 2000);
-          }
-        }
-      );
-      
-      
-      
-      
+      // $("#vid1").avid5(
+      //   {
+      //     videos: { 
+      //        0 : { path: "media/compressed.webm", codec: "video/webm" }
+      //       ,1 : { path: "media/compressed.ogv", codec: "video/ogg" }
+      //       ,2 : { path: "media/compressed.mp4", codec: "video/mp4" }
+      //     }
+      //     ,width: 480
+      //     ,height: 244
+      //     ,video_loop_end: 1000
+      //     ,video_loop_start: 500 
+      //     ,autoplay: false
+      //     ,swf_video_path: "/mindcheck_plugin/media/compressed.flv" // relative to swf file
+      //   }
+      // );
+    //   
+    //   
+    //   
+    //   
+    //   $("#vid2").avid5(
+    //     {
+    //       videos: { 
+    //          0 : { path: "media/compressed.webm", codec: "video/webm" }
+    //         ,1 : { path: "media/compressed.ogv", codec: "video/ogg" }
+    //         ,2 : { path: "media/compressed.mp4", codec: "video/mp4" }
+    //       }
+    //       ,width: 480
+    //       ,height: 244
+    //       ,video_loop_end: 2000
+    //       ,video_loop_start: 0
+    //       ,action_img_path: "img/success.jpg"
+    //       ,action_url_path: "http://www.google.com/"
+    //       ,callback: function() {
+    //         $("#vid2").css({border: "dashed 2px #FF00FF"});
+    //         $("#vid2").animate({left: "-150px"}, 2000);
+    //       }
+    //     }
+    //   );
+    //   
+    //   
+    //   
+    //   
       $("#vid3").avid5(
         {
           videos: { 
-             0 : { path: "media/compressed.webm", codec: "video/webm" }
-            ,1 : { path: "media/compressed.ogv", codec: "video/ogg" }
-            ,2 : { path: "media/compressed.mp4", codec: "video/mp4" }
+             0 : { path: "http://grey.local/mindcheck_plugin/media/ie_vid.mp4", codec: "video/mp4" }
+            ,1 : { path: "media/compressed.webm", codec: "video/webm" }
+            ,2 : { path: "media/compressed.ogv", codec: "video/ogg" }
           }
           ,width: 480
           ,height: 244
@@ -88,7 +89,7 @@
       //$("#vid1").data('avid5').videoelem[0].play();
       
     
-    });
+     });
 
     
     
@@ -104,7 +105,7 @@
     <div id="main" role="main">
       
       
-      <!-- <textarea name="lo" rows="8" cols="40" id="log"></textarea> -->
+      <textarea name="lo" rows="8" cols="40" id="log"></textarea>
       
         <div id="vid1" class="avid5">
           <img src="img/one.png" width="480" height="244" alt="this is my alt" title="this is my title" />

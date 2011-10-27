@@ -69,20 +69,26 @@
        
       ,is_html5_enabled: function() {
         
-        return false;
-        
-        // var log = $("#log");
-        // var logtext = '';
-        // logtext += "has canvas: " + Modernizr.canvas + "\n";
-        // logtext += "has has_h264: " + Modernizr.video.h264 + "\n";
-        // logtext += "has has_ogg: " + Modernizr.video.ogg + "\n";
-        // logtext += "has webm: " + Modernizr.video.webm + "\n";
-        // logtext += "is safari: " + $.browser.safari + "\n";
-        // logtext += "version: " + $.browser.version + "\n";
-        // logtext += "is ios: " + is_ios + "\n";
-        // log.val(logtext);
+        //return false;
         
         var is_mobile = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || false;
+        
+        var has_flash = this.is_flash_enabled();
+        
+        
+        var log = $("#log");
+        var logtext = '';
+        logtext += "has canvas: " + Modernizr.canvas + "\n";
+        logtext += "has has_h264: " + Modernizr.video.h264 + "\n";
+        logtext += "has has_ogg: " + Modernizr.video.ogg + "\n";
+        logtext += "has webm: " + Modernizr.video.webm + "\n";
+        logtext += "has flash: " + has_flash + "\n";
+        logtext += "is safari: " + $.browser.safari + "\n";
+        logtext += "version: " + $.browser.version + "\n";
+        logtext += "is ios: " + is_mobile + "\n";
+        log.val(logtext);
+        
+        
         
         if(is_mobile !== false) {
           return false; // mobile does not have enough power to go from video to canvas :(
@@ -98,6 +104,18 @@
         if(this.has_canvas && (this.has_ogg == "probably" || this.has_ogg == "maybe")) {
           return true;
         }
+        
+        // webm IE 9 and safari (sometimes)
+        if(this.has_canvas && (this.has_webm == "probably" || this.has_webm == "maybe")) {          
+          return true;
+        }
+        
+        
+        if($.browser.msie == true && parseInt($.browser.version) >= 9 && !this.has_webm) {
+          alert('Your broswer has the capability of displaying this content but is missing a plugin. Download it from google here: https://tools.google.com/dlpage/webmmf');
+          return false;
+        }
+        
         
         // probably ie
         return false;
@@ -155,8 +173,17 @@
       
       ,flash_click: function(instanceID) {
         
-        console.log('CALLED');
-        console.log(instanceID);
+        var instance = this.get_instance(instanceID);
+        
+        
+        setTimeout(
+          function() {
+            instance.click_action_default_callback();
+            instance.click_action_extra_callback();
+          }, 
+          instance.options.action_callback_delay
+        );
+
         
       }
       
@@ -203,7 +230,7 @@
        // Resize The element
        $(this.element).css({
          height: this.options.height + "px", 
-         width : this.options.width + "px" , 
+         width : this.options.width + "px" 
          // overflow:"hidden"
         });
         
@@ -260,7 +287,7 @@
      // Buffer canvas for video processing
      var bufferCanvas = $("<canvas />");
      bufferCanvas.addClass('buffer-canvas')
-     .attr('style', 'display:none')
+     // .attr('style', 'display:none')
      .attr('height', parseInt(this.options.height * 2))
      .attr('width', parseInt(this.options.width));
      
@@ -270,19 +297,35 @@
      .attr('width', parseInt(this.options.width))
      .attr('preload', 'true')
      // .attr('loop', 'true')
-     .attr('style', "display:none")
+     // .attr('style', "display:none")
      .attr('controls', 'true')
      .attr("id", 'video-' + $.avid5.instance_count)
      .attr('class', 'video');
+          
+      // Create the video sources tags
+       $.each(this.options.videos, function(i, v) {
+         // create the tag
+         var vidsource = "<source type=\"" + v.codec + "\" src='" + v.path + "' />";       
+
+         // add it to the video tag
+         video.append(vidsource);  
+
+         // special for IE (of course)
+         if($.browser.msie == true && parseInt($.browser.version) >= 9) {
+                      
+           if($.avid5.has_h264 && v.codec.match(/video\/mp4/)) {
+             video.attr("src", v.path);
+           }
+           if($.avid5.has_h264.has_webm && v.codec.match(/video\/wemb/)) {
+             video.attr("src", v.path);
+           }
+           
+         }
+
+       });
       
       
-     // Create the video sources tags
-     $.each(this.options.videos, function(i, v) {
-       // create the tag
-       var vidsource = "<source type=\"" + v.codec + "\" src='" + v.path + "' />";       
-       // add it to the video tag
-       video.append(vidsource);  
-     });
+     
      
      
      // Only ad an action link and image if there is one
@@ -342,12 +385,21 @@
      swfcontainer.attr('id',id);
      
      $(this.element).html(swfcontainer);          
-     var so = new SWFObject(this.options.swf_path, id, this.options.width, this.options.height, "9.0.0");
-     so.addParam("quality", "high");
-     so.addParam("wmode", "transparent");
-     so.addVariable('instanceID', this.instanceID);
-     so.write(id);
      
+     var flashvars = {
+        instanceID : this.instanceID
+       ,swf_video_path : this.options.swf_video_path
+       ,vid_width: this.options.width
+       ,vid_height: this.options.height
+     };
+     var params = {
+       quality: "high"
+       ,wmode: "transparent"
+     };
+     var attr = {};
+     
+     swfobject.embedSWF(this.options.swf_path, id, this.options.width, this.options.height, "9.0.0", '', flashvars, params, attr);
+         
      
      
      
