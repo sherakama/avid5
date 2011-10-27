@@ -1,0 +1,25 @@
+<!DOCTYPE html> 
+<title>Video/Canvas Demo 0</title> 
+
+ 
+<!-- <video> tag, with the @controls attribute
+     giving it the play/pause/seeker controls,
+     and the @loop making it automatically loop. --> 
+<video controls loop> 
+	<!-- I have two versions of the video encoded with
+	     different codecs.  The browser will automatically
+	     choose the first one it knows it can play. --> 
+	<source src=media/video.webm type=video/webm> 
+	<source src=media/video.ogg type=video/ogg> 
+	<source src=media/video.mp4 type=video/mp4> 
+</video> 
+<!-- That's it!  You now have video playing in your browser! --> 
+ 
+<style> 
+video {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -180px 0 0 -240px;
+}
+</style>

@@ -35,9 +35,10 @@
            height                 : 480
           ,width                  : 640
           ,videos                 : {} // absolute paths work best
-          ,swf_path               : ''
+          ,swf_path               : 'js/avid5/swf/video_player.swf'
           ,swf_video_path         : ''
           ,action_img_path        : '' 
+          ,action_url_path        : '#' 
           ,autoplay               : true // play the looping portion of the video automatically
           ,video_loop_start       : 0 // in milliseconds
           ,video_loop_end         : 5000 // in miliseconds
@@ -65,28 +66,98 @@
        * validates the browser for canvas and video capabilities
        * returns boolean
        **/
+       
       ,is_html5_enabled: function() {
-                
-        if(this.has_canvas && (this.has_h264 == "" || this.has_h264 == "probably")) {
+        
+        return false;
+        
+        // var log = $("#log");
+        // var logtext = '';
+        // logtext += "has canvas: " + Modernizr.canvas + "\n";
+        // logtext += "has has_h264: " + Modernizr.video.h264 + "\n";
+        // logtext += "has has_ogg: " + Modernizr.video.ogg + "\n";
+        // logtext += "has webm: " + Modernizr.video.webm + "\n";
+        // logtext += "is safari: " + $.browser.safari + "\n";
+        // logtext += "version: " + $.browser.version + "\n";
+        // logtext += "is ios: " + is_ios + "\n";
+        // log.val(logtext);
+        
+        var is_mobile = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || false;
+        
+        if(is_mobile !== false) {
+          return false; // mobile does not have enough power to go from video to canvas :(
+        }
+        
+        
+        // Webkit
+        if(this.has_canvas && (this.has_h264 == "probably" || this.has_h264 == "maybe")) {
           return true;
         }
+        
+        // the moz... Gecko
+        if(this.has_canvas && (this.has_ogg == "probably" || this.has_ogg == "maybe")) {
+          return true;
+        }
+        
+        // probably ie
         return false;
       }
+      
+      
       
       /**
        * validates the browser for flash capabilities
        * returns boolean
        **/
+       
       ,is_flash_enabled: function() {
+        
+        if(swfobject == undefined) {
+          alert('Please Install SWFObject 2 or later');
+        }
+        
+        var version = swfobject.getFlashPlayerVersion();
+                
+        if(version.major >= 9) {
+          return true;
+        }
+        
         return false;
+        
       }
+      
+      
       
       /**
       * Get Instance
       * Returns a stored instance by ID
       **/
+      
       ,get_instance: function(id) {
         return this.instance_container[id];
+      }
+      
+      
+      /**
+      * Removes the action links from view on all items
+      **/
+      
+      ,remove_action_links: function() {
+        $.each(this.instance_container, function(i, v){
+          v.remove_action_link();
+        });
+      }
+      
+      
+      /**
+      * External Interface call (from flash)
+      */
+      
+      ,flash_click: function(instanceID) {
+        
+        console.log('CALLED');
+        console.log(instanceID);
+        
       }
       
     };
@@ -133,8 +204,14 @@
        $(this.element).css({
          height: this.options.height + "px", 
          width : this.options.width + "px" , 
-         overflow:"hidden"
+         // overflow:"hidden"
         });
+        
+        // Add the avid5 class to the main element
+        if(!$(this.element).hasClass('avid5')) {
+          $(this.element).addClass('avid5');
+        }
+        
         
         
         // if html5 enabled build out that version
@@ -150,7 +227,10 @@
        else
        // No flash no html5 then fallback to static image
        {
-         // Sad face   :(
+        
+        // Sad face   :( 
+        this.add_default_click_handling();
+           
        }
        
        
@@ -167,41 +247,60 @@
    
    avid5.prototype.build_html5_vid = function () {
      
-     // Create some tags
+     // The poster image will be the static image
+     this.poster = $(this.element).find('img');
+     
+     // Create the output (what is seen) canvas tag
      var outputCanvas = $("<canvas />");
      outputCanvas.addClass('output-canvas')
      .attr('style', 'display:block')
      .attr('height', parseInt(this.options.height))
      .attr('width', parseInt(this.options.width));
      
+     // Buffer canvas for video processing
      var bufferCanvas = $("<canvas />");
      bufferCanvas.addClass('buffer-canvas')
      .attr('style', 'display:none')
      .attr('height', parseInt(this.options.height * 2))
      .attr('width', parseInt(this.options.width));
      
+     // The video tag
      var video = $("<video />");
-     video.attr('style', "visibility:hidden")
-     .attr('height', parseInt(this.options.height * 2))
+     video.attr('height', parseInt(this.options.height * 2))
      .attr('width', parseInt(this.options.width))
      .attr('preload', 'true')
      // .attr('loop', 'true')
+     .attr('style', "display:none")
+     .attr('controls', 'true')
      .attr("id", 'video-' + $.avid5.instance_count)
      .attr('class', 'video');
-     
-     // Autoplay > moved to video events in play_loop
-     // if(this.options.autoplay) {
-     //   video.attr('autoplay','true'); 
-     // }
       
-     // Create the source video tag
+      
+     // Create the video sources tags
      $.each(this.options.videos, function(i, v) {
        // create the tag
        var vidsource = "<source type=\"" + v.codec + "\" src='" + v.path + "' />";       
        // add it to the video tag
        video.append(vidsource);  
      });
-    
+     
+     
+     // Only ad an action link and image if there is one
+     if(this.options.action_img_path.length >= 1) {
+       
+       var actionLink = $("<a />");
+       actionLink.attr('href', this.options.action_url_path)
+       .addClass('hidden action-link');
+
+       var actionImage = $("<img />");
+       actionImage.attr('src', this.options.action_img_path)
+       .addClass('action-image');
+      
+      // nest them
+      actionLink.append(actionImage);
+       
+     }
+
      
      // Add it to the dom!
      var elem = $(this.element)
@@ -211,16 +310,22 @@
      elem.append(bufferCanvas);
      elem.append(video);
      
+     // If there is an action link then add it
+     if(actionLink !== undefined) {
+       elem.append(actionLink);
+     }
+
      // store references for use later
      this.outputcanvas = outputCanvas;
      this.buffercanvas = bufferCanvas;
      this.videoelem = video;
-
+     this.actionLink = actionLink;
+     
      // Start the loop
     this.play_loop(); 
     
     // Event Handlers
-    this.html5_setup_event_handlers()
+    this.html5_setup_event_handlers();
      
    };
    
@@ -231,6 +336,18 @@
    */
    
    avid5.prototype.build_flash_vid = function () {
+     
+     var id = 'flvplayer-' + this.instanceID;
+     var swfcontainer = $("<div class=\"swf-container\" />");
+     swfcontainer.attr('id',id);
+     
+     $(this.element).html(swfcontainer);          
+     var so = new SWFObject(this.options.swf_path, id, this.options.width, this.options.height, "9.0.0");
+     so.addParam("quality", "high");
+     so.addParam("wmode", "transparent");
+     so.addVariable('instanceID', this.instanceID);
+     so.write(id);
+     
      
      
      
@@ -250,13 +367,40 @@
         var video = this.videoelem[0];
         video.instanceID = this.instanceID;
         video.loop_start = this.options.video_loop_start / 1000;
+                
         
         // Check for autoplay
         if(this.options.autoplay) {
-          video.addEventListener('canplay', function() {
+          
+          // process first frame
+          video.play();
+          video.pause();
+          
+          video.addEventListener('canplaythrough', function() {
+
             this.currentTime = this.loop_start;
-            this.play();
+            var video = this;
+            
+            // create a random timeout and start the loop again
+            var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
+                timeout *= 1000;
+
+            setTimeout(function() { video.play(); }, timeout);
+                        
           }, false);
+        } else {
+          // Create a poster element
+          if(this.poster.length >= 1) {
+            
+            var posterImage = this.poster;
+            var output = this.outputcanvas[0].getContext('2d');
+            posterImage.load(function() {
+              output.drawImage(posterImage[0], 0, 0);
+            });
+
+          }
+          
+          
         }
                 
         // add play listenter to the video
@@ -289,40 +433,38 @@
 
 
   /**
-   *
-   *
+   * Loop sequence end of clip event handler
+   * 
    **/
 
     avid5.prototype.video_listener_loop_ended = function() {
-      // Nothing so far
-      console.log("ENDED");
-      
+      // Just re loop
+      var instance = $(this).parent().data('avid5');
+      instance.videoelem[0].play();
     }
 
     /**
-    *
+    * Loop sequence play event handler
     *
     **/
     
     avid5.prototype.video_listener_loop_play = function() {
-        console.log('PLAY');    
-
+        // console.log('PLAY');    
         var instance = $(this).parent().data('avid5');
         clearInterval(instance.process_interval);
         instance.process_interval = setInterval(function() {
           instance.process_frame();
           instance.check_loop();
         }, 35);
-        
     }
 
     /**
-     * 
+     * Full play through event handler
      *
      **/
 
      avid5.prototype.video_listener_full_play = function() {
-         console.log('PLAY FULL');    
+         // console.log('PLAY FULL');    
          // Setup the process interval again
          var instance = $(this).parent().data('avid5');
          clearInterval(instance.process_interval);
@@ -330,32 +472,72 @@
            instance.process_frame();
          }, 35);
 
-         // Create the callback action timer
-         setTimeout(instance.click_action_default_callback, instance.options.action_callback_delay);
+        
 
      }
 
      /**
-      * 
+      * Full play through end of clip handler
       *
       **/
 
       avid5.prototype.video_listener_full_ended = function() {
-        console.log('ENDED FULL');    
+        // console.log('ENDED FULL');    
+        var instance = $(this).parent().data('avid5');
+        var video = instance.videoelem[0];
+                
+        video.pause();
+        
+        // remove full play event listeners
+        video.removeEventListener('play', instance.video_listener_full_play, false);
+        video.removeEventListener('ended', instance.video_listener_full_ended, false);
+        
+        // Add in loop portion video listeners
+        video.addEventListener('ended', instance.video_listener_loop_ended, false);
+        video.addEventListener('play', instance.video_listener_loop_play, false);
+        
+        // create a random timeout and start the loop again
+        var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
+            timeout *= 1000;
+                
+        setTimeout(function() { video.play(); }, timeout);
 
       }
 
 
-     /**
-     * 
-     *
-     **/
+    /**
+    * Default click on the video callback action. Called after a delay
+    * fades in action item
+    **/
 
-     avid5.prototype.click_action_default_callback = function() {
-        console.log('DO CALLBACK');    
-        $("body").css({background:'#F0F'});
-      }
+    avid5.prototype.click_action_default_callback = function() {
+      //console.log('DO CALLBACK');    
+    
+      // Make sure there is something to work on
+      if(this.actionLink == undefined) { return ; }
+  
+      // Remove all other action links
+      $.avid5.remove_action_links(this);
+  
+      // Kill all actions on the action link, then fade it in.
+      this.actionLink.stop().removeClass('hidden').hide().fadeIn('slow');
+      
+   
+    }
+      
+      
+      
+    /**
+    * Default click on the video callback action. Called after a delay
+    * fades in action item
+    **/
 
+    avid5.prototype.click_action_extra_callback = function() {
+       //console.log('DO CALLBACK');    
+       
+       this.options.callback(); // hehe
+
+     }  
 
     /**
     * process the video frame and display it on the page
@@ -364,6 +546,8 @@
 
     avid5.prototype.process_frame = function () {
 
+      // console.log('PROCESS');
+
       var buffer = this.buffercanvas[0].getContext('2d');
       var output = this.outputcanvas[0].getContext('2d');
       var video = this.videoelem[0];
@@ -371,19 +555,20 @@
       var height = this.options.height;
 
       buffer.drawImage(video, 0, 0);
-
+      
       // this can be done without alphaData, except in Firefox which doesn't like 
       // it when image is bigger than the canvas
-      var	image = buffer.getImageData(0, 0, width, height),
+      var  image = buffer.getImageData(0, 0, width, height),
       imageData = image.data,
       alphaData = buffer.getImageData(0, height, width, height).data;
-  
+                
       for (var i = 3, len = imageData.length; i < len; i = i + 4) {
         imageData[i] = alphaData[i-1];
       }
 
-      output.putImageData(image, 0, 0, 0, 0, width, height);
+     output.putImageData(image, 0, 0, 0, 0, width, height);
      
+
     }
 
 
@@ -400,7 +585,15 @@
       if(cur_pos >= this.options.video_loop_end) {
         video.pause();
         video.currentTime = this.options.video_loop_start / 1000;
-        video.play();
+        // video.play();
+        
+        // create a random timeout and start the loop again
+        var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
+            timeout *= 1000;
+                
+        setTimeout(function() { video.play(); }, timeout);
+        
+        
       }
       
     }
@@ -415,7 +608,7 @@
             
      var outputCanvas = this.outputcanvas[0];
                
-      // CLICK HANDLING
+      // CANVAS CLICK HANDLING
       this.outputcanvas.click(function(e){
         e.preventDefault();
         
@@ -438,16 +631,108 @@
         
         // Resume playing
         video.play();
+          
+          
+        // action event handling. Call the default and extra callback after the delay
+        setTimeout(
+          function() {
+            instance.click_action_default_callback();
+            instance.click_action_extra_callback();
+          }, 
+          instance.options.action_callback_delay
+        );  
+        
+        
+          
+      });
+      
+          
+      
+      // ACTION LINK CLICK HANDLING
+      if(this.actionLink !== undefined) {        
+        // DISABLE THE CLICK IF # is the url
+        if(this.options.action_url_path == "#") {
+          this.actionLink.click(function(e){
+              e.preventDefault();
+          });
+        }
+      }
+       
+      
+    }
+
+// Flash Specific
+// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  
+  
+  
+  
+// Default and static support
+// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    
+    avid5.prototype.add_default_click_handling = function() {
+      
+      var instance = this;
+      
+      
+      // Only ad an action link and image if there is one
+       if(this.options.action_img_path.length >= 1) {
+
+         var actionLink = $("<a />");
+         actionLink.attr('href', this.options.action_url_path)
+         .addClass('hidden action-link');
+
+         var actionImage = $("<img />");
+         actionImage.attr('src', this.options.action_img_path)
+         .addClass('action-image');
+
+        // nest them
+        actionLink.append(actionImage);
+        
+        this.actionLink = actionLink;
+        $(this.element).append(actionLink);
+
+       }
+      
+      
+      
+      
+      $(this.element).click(function() {
+        
+        // action event handling. Call the default and extra callback after the delay
+        setTimeout(
+          function() {
+            instance.click_action_default_callback();
+            instance.click_action_extra_callback();
+          }, 
+          instance.options.action_callback_delay
+        );
         
       });
       
-      
     }
-    
+
+
+    /**
+    * Add the default event handlers from user interaction (hover/click)
+    **/
+
+    avid5.prototype.remove_action_link = function() {
+     
+     
+      if(this.actionLink !== undefined && this.actionLink.size) {
+        this.actionLink.fadeOut('fast');
+      }
+  
+  
+    }
+
+
 
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 
    // A really lightweight plugin wrapper around the constructor,
