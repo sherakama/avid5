@@ -76,18 +76,18 @@
         var has_flash = this.is_flash_enabled();
         
         
-        var log = $("#log");
-        var logtext = '';
-        logtext += "has canvas: " + Modernizr.canvas + "\n";
-        logtext += "has has_h264: " + Modernizr.video.h264 + "\n";
-        logtext += "has has_ogg: " + Modernizr.video.ogg + "\n";
-        logtext += "has webm: " + Modernizr.video.webm + "\n";
-        logtext += "has flash: " + has_flash + "\n";
-        logtext += "is safari: " + $.browser.safari + "\n";
-        logtext += "version: " + $.browser.version + "\n";
-        logtext += "is ios: " + is_mobile + "\n";
-        log.val(logtext);
-        
+        // var log = $("#log");
+        // var logtext = '';
+        // logtext += "has canvas: " + Modernizr.canvas + "\n";
+        // logtext += "has has_h264: " + Modernizr.video.h264 + "\n";
+        // logtext += "has has_ogg: " + Modernizr.video.ogg + "\n";
+        // logtext += "has webm: " + Modernizr.video.webm + "\n";
+        // logtext += "has flash: " + has_flash + "\n";
+        // logtext += "is safari: " + $.browser.safari + "\n";
+        // logtext += "version: " + $.browser.version + "\n";
+        // logtext += "is ios: " + is_mobile + "\n";
+        // log.val(logtext);
+        // 
         
         
         if(is_mobile !== false) {
@@ -287,7 +287,7 @@
      // Buffer canvas for video processing
      var bufferCanvas = $("<canvas />");
      bufferCanvas.addClass('buffer-canvas')
-     // .attr('style', 'display:none')
+     .attr('style', 'display:none')
      .attr('height', parseInt(this.options.height * 2))
      .attr('width', parseInt(this.options.width));
      
@@ -297,7 +297,8 @@
      .attr('width', parseInt(this.options.width))
      .attr('preload', 'true')
      // .attr('loop', 'true')
-     // .attr('style', "display:none")
+     // .attr('autoplay', 'true')
+     .attr('style', "display:none")
      .attr('controls', 'true')
      .attr("id", 'video-' + $.avid5.instance_count)
      .attr('class', 'video');
@@ -324,8 +325,7 @@
 
        });
       
-      
-     
+           
      
      
      // Only ad an action link and image if there is one
@@ -350,7 +350,7 @@
      elem.html(''); // clear out whatever is already there
      
      elem.append(outputCanvas);
-     elem.append(bufferCanvas);
+     // elem.append(bufferCanvas);
      elem.append(video);
      
      // If there is an action link then add it
@@ -440,6 +440,8 @@
             setTimeout(function() { video.play(); }, timeout);
                         
           }, false);
+          
+          
         } else {
           // Create a poster element
           if(this.poster.length >= 1) {
@@ -803,7 +805,3 @@
 
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
