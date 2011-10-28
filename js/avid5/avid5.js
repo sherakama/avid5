@@ -90,9 +90,9 @@
         // 
         
         
-        // if(is_mobile !== false) {
-        //   return false; // mobile does not have enough power to go from video to canvas :(
-        // }
+        if(is_mobile !== false) {
+          return false; // mobile does not have enough power to go from video to canvas :(
+        }
         
         
         // Webkit
