@@ -350,7 +350,7 @@
      elem.html(''); // clear out whatever is already there
      
      elem.append(outputCanvas);
-     // elem.append(bufferCanvas);
+     elem.append(bufferCanvas);
      elem.append(video);
      
      // If there is an action link then add it
@@ -425,21 +425,10 @@
         if(this.options.autoplay) {
           
           // process first frame
-          video.play();
-          video.pause();
-          
-          video.addEventListener('canplaythrough', function() {
-
-            this.currentTime = this.loop_start;
-            var video = this;
-            
-            // create a random timeout and start the loop again
-            var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
-                timeout *= 1000;
-
-            setTimeout(function() { video.play(); }, timeout);
-                        
-          }, false);
+          video.addEventListener('canplay', this.video_listener_can_play, false);
+                    
+          // Play on ready
+          video.addEventListener('canplaythrough', this.video_listener_can_play_through, false);
           
           
         } else {
@@ -484,6 +473,41 @@
 
 // HTML 5 Specific
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /**
+    * When the movie is ready to play a frame
+    */
+
+    avid5.prototype.video_listener_can_play = function(){
+      var instance = $(this).parent().data('avid5');
+      var video = instance.videoelem[0];
+      video.play();
+      video.pause();
+      video.removeEventListener('canplay', instance.video_listener_can_play_through, false);
+    }
+
+
+  /**
+  * When the movie is ready to play through
+  */
+  
+  avid5.prototype.video_listener_can_play_through = function() {
+    
+      var instance = $(this).parent().data('avid5');
+      var video = instance.videoelem[0];
+
+      video.currentTime = video.loop_start;
+      
+      // create a random timeout and start the loop again
+      var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
+          timeout *= 1000;
+
+      setTimeout(function() { video.play(); }, timeout);
+
+      video.removeEventListener('canplaythrough', instance.video_listener_can_play_through, false);
+
+  }
 
 
   /**
@@ -635,19 +659,17 @@
     avid5.prototype.check_loop = function () {
       var video = this.videoelem[0];
       var cur_pos = parseInt(video.currentTime * 1000);
-      
-      if(cur_pos >= this.options.video_loop_end) {
+                        
+      if(cur_pos >= parseInt(this.options.video_loop_end)) {
         video.pause();
         video.currentTime = this.options.video_loop_start / 1000;
-        // video.play();
+        // video.play();        
         
         // create a random timeout and start the loop again
         var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
             timeout *= 1000;
                 
-        setTimeout(function() { video.play(); }, timeout);
-        
-        
+        setTimeout(function() { video.play(); }, timeout);        
       }
       
     }
