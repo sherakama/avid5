@@ -248,7 +248,7 @@
         else if
        // If not html5 enabled but has flash
        // if html5 enabled build out that version
-       (!$.avid5.is_html5_enabled() && $.avid5.is_flash_enabled()){
+       (!$.avid5.is_html5_enabled() && $.avid5.is_flash_enabled() && this.swf_video_path.length >= 3){
          this.build_flash_vid();
        }
        else
@@ -707,7 +707,6 @@
         
         // Resume playing
         video.play();
-          
           
         // action event handling. Call the default and extra callback after the delay
         setTimeout(
