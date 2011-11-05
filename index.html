@@ -38,8 +38,11 @@
           ,height: 244
           ,video_loop_end: 1000
           ,video_loop_start: 500 
-          ,autoplay: false
-          ,swf_video_path: "/mindcheck_plugin/media/compressed.flv" // relative to swf file
+          ,autoplay: true
+          ,callback: function() {
+              alert('click');
+            }
+          ,swf_video_path: "/mindcheck_plugin/media/compressed2.flv" // relative to swf file
         }
       );
       
@@ -57,12 +60,11 @@
           ,height: 244
           ,video_loop_end: 2000
           ,video_loop_start: 0
-          ,action_img_path: "img/success.jpg"
-          ,action_url_path: "http://www.google.com/"
           ,callback: function() {
             $("#vid2").css({border: "dashed 2px #FF00FF"});
             $("#vid2").animate({left: "-150px"}, 2000);
           }
+          ,swf_video_path: "/mindcheck_plugin/media/compressed.mp4" // relative to swf file
         }
       );
     
@@ -80,8 +82,6 @@
           ,height: 244
           ,video_loop_end: 4000
           ,video_loop_start: 0
-          ,action_img_path: "img/success2.png"
-          ,action_url_path: "http://www.imagexmedia.com/"
         }
       );
     

@@ -37,8 +37,8 @@
           ,videos                 : {} // absolute paths work best
           ,swf_path               : 'js/avid5/swf/video_player.swf'
           ,swf_video_path         : ''
-          ,action_img_path        : '' 
-          ,action_url_path        : '#' 
+          // ,action_img_path        : '' 
+          // ,action_url_path        : '#' 
           ,autoplay               : true // play the looping portion of the video automatically
           ,video_loop_start       : 0 // in milliseconds
           ,video_loop_end         : 5000 // in miliseconds
@@ -69,7 +69,7 @@
        
       ,is_html5_enabled: function() {
         
-        //return false;
+        return false;
         
         var is_mobile = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || false;
         
@@ -110,7 +110,7 @@
           return true;
         }
         
-        
+        // Prompt ie 9 users for webm
         if($.browser.msie == true && parseInt($.browser.version) >= 9 && !this.has_webm) {
           alert('Your broswer has the capability of displaying this content but is missing a plugin. Download it from google here: https://tools.google.com/dlpage/webmmf');
           return false;
@@ -129,13 +129,13 @@
        **/
        
       ,is_flash_enabled: function() {
-        
+                
         if(swfobject == undefined) {
           alert('Please Install SWFObject 2 or later');
         }
         
         var version = swfobject.getFlashPlayerVersion();
-                
+                                
         if(version.major >= 9) {
           return true;
         }
@@ -160,11 +160,11 @@
       * Removes the action links from view on all items
       **/
       
-      ,remove_action_links: function() {
-        $.each(this.instance_container, function(i, v){
-          v.remove_action_link();
-        });
-      }
+      // ,remove_action_links: function() {
+      //   $.each(this.instance_container, function(i, v){
+      //     v.remove_action_link();
+      //   });
+      // }
       
       
       /**
@@ -175,10 +175,9 @@
         
         var instance = this.get_instance(instanceID);
         
-        
         setTimeout(
           function() {
-            instance.click_action_default_callback();
+            // instance.click_action_default_callback();
             instance.click_action_extra_callback();
           }, 
           instance.options.action_callback_delay
@@ -248,7 +247,7 @@
         else if
        // If not html5 enabled but has flash
        // if html5 enabled build out that version
-       (!$.avid5.is_html5_enabled() && $.avid5.is_flash_enabled() && this.swf_video_path.length >= 3){
+       (!$.avid5.is_html5_enabled() && $.avid5.is_flash_enabled() && this.options.swf_video_path.length >= 3){
          this.build_flash_vid();
        }
        else
@@ -329,20 +328,20 @@
      
      
      // Only ad an action link and image if there is one
-     if(this.options.action_img_path.length >= 1) {
-       
-       var actionLink = $("<a />");
-       actionLink.attr('href', this.options.action_url_path)
-       .addClass('hidden action-link');
-
-       var actionImage = $("<img />");
-       actionImage.attr('src', this.options.action_img_path)
-       .addClass('action-image');
-      
-      // nest them
-      actionLink.append(actionImage);
-       
-     }
+     // if(this.options.action_img_path.length >= 1) {
+     //       
+     //       var actionLink = $("<a />");
+     //       actionLink.attr('href', this.options.action_url_path)
+     //       .addClass('hidden action-link');
+     // 
+     //       var actionImage = $("<img />");
+     //       actionImage.attr('src', this.options.action_img_path)
+     //       .addClass('action-image');
+     //      
+     //      // nest them
+     //      actionLink.append(actionImage);
+     //       
+     //     }
 
      
      // Add it to the dom!
@@ -354,15 +353,15 @@
      elem.append(video);
      
      // If there is an action link then add it
-     if(actionLink !== undefined) {
-       elem.append(actionLink);
-     }
+     // if(actionLink !== undefined) {
+     //   elem.append(actionLink);
+     // }
 
      // store references for use later
      this.outputcanvas = outputCanvas;
      this.buffercanvas = bufferCanvas;
      this.videoelem = video;
-     this.actionLink = actionLink;
+//     this.actionLink = actionLink;
      
      // Start the loop
     this.play_loop(); 
@@ -391,11 +390,16 @@
        ,swf_video_path : this.options.swf_video_path
        ,vid_width: this.options.width
        ,vid_height: this.options.height
+       ,autoplay: this.options.autoplay
+       ,video_loop_start : this.options.video_loop_start
+       ,video_loop_end: this.options.video_loop_end
      };
+     
      var params = {
        quality: "high"
        ,wmode: "transparent"
      };
+     
      var attr = {};
      
      swfobject.embedSWF(this.options.swf_path, id, this.options.width, this.options.height, "9.0.0", '', flashvars, params, attr);
@@ -588,20 +592,20 @@
     * fades in action item
     **/
 
-    avid5.prototype.click_action_default_callback = function() {
-      //console.log('DO CALLBACK');    
-    
-      // Make sure there is something to work on
-      if(this.actionLink == undefined) { return ; }
-  
-      // Remove all other action links
-      $.avid5.remove_action_links(this);
-  
-      // Kill all actions on the action link, then fade it in.
-      this.actionLink.stop().removeClass('hidden').hide().fadeIn('slow');
-      
-   
-    }
+    // avid5.prototype.click_action_default_callback = function() {
+    //   //console.log('DO CALLBACK');    
+    // 
+    //   // Make sure there is something to work on
+    //   if(this.actionLink == undefined) { return ; }
+    //   
+    //   // Remove all other action links
+    //   $.avid5.remove_action_links(this);
+    //   
+    //   // Kill all actions on the action link, then fade it in.
+    //   this.actionLink.stop().removeClass('hidden').hide().fadeIn('slow');
+    //   
+    //    
+    // }
       
       
       
@@ -639,6 +643,8 @@
       var  image = buffer.getImageData(0, 0, width, height),
       imageData = image.data,
       alphaData = buffer.getImageData(0, height, width, height).data;
+      
+      // console.log(alphaData);          
                 
       for (var i = 3, len = imageData.length; i < len; i = i + 4) {
         imageData[i] = alphaData[i-1];
@@ -711,7 +717,7 @@
         // action event handling. Call the default and extra callback after the delay
         setTimeout(
           function() {
-            instance.click_action_default_callback();
+            // instance.click_action_default_callback();
             instance.click_action_extra_callback();
           }, 
           instance.options.action_callback_delay
@@ -724,14 +730,14 @@
           
       
       // ACTION LINK CLICK HANDLING
-      if(this.actionLink !== undefined) {        
-        // DISABLE THE CLICK IF # is the url
-        if(this.options.action_url_path == "#") {
-          this.actionLink.click(function(e){
-              e.preventDefault();
-          });
-        }
-      }
+      // if(this.actionLink !== undefined) {        
+      //         // DISABLE THE CLICK IF # is the url
+      //         if(this.options.action_url_path == "#") {
+      //           this.actionLink.click(function(e){
+      //               e.preventDefault();
+      //           });
+      //         }
+      //       }
        
       
     }
@@ -753,23 +759,23 @@
       
       
       // Only ad an action link and image if there is one
-       if(this.options.action_img_path.length >= 1) {
-
-         var actionLink = $("<a />");
-         actionLink.attr('href', this.options.action_url_path)
-         .addClass('hidden action-link');
-
-         var actionImage = $("<img />");
-         actionImage.attr('src', this.options.action_img_path)
-         .addClass('action-image');
-
-        // nest them
-        actionLink.append(actionImage);
-        
-        this.actionLink = actionLink;
-        $(this.element).append(actionLink);
-
-       }
+       // if(this.options.action_img_path.length >= 1) {
+       // 
+       //   var actionLink = $("<a />");
+       //   actionLink.attr('href', this.options.action_url_path)
+       //   .addClass('hidden action-link');
+       // 
+       //   var actionImage = $("<img />");
+       //   actionImage.attr('src', this.options.action_img_path)
+       //   .addClass('action-image');
+       // 
+       //  // nest them
+       //  actionLink.append(actionImage);
+       //  
+       //  this.actionLink = actionLink;
+       //  $(this.element).append(actionLink);
+       // 
+       // }
       
       
       
@@ -779,13 +785,14 @@
         // action event handling. Call the default and extra callback after the delay
         setTimeout(
           function() {
-            instance.click_action_default_callback();
+            // instance.click_action_default_callback();
             instance.click_action_extra_callback();
           }, 
           instance.options.action_callback_delay
         );
         
       });
+      
       
     }
 
@@ -794,15 +801,15 @@
     * Add the default event handlers from user interaction (hover/click)
     **/
 
-    avid5.prototype.remove_action_link = function() {
-     
-     
-      if(this.actionLink !== undefined && this.actionLink.size) {
-        this.actionLink.fadeOut('fast');
-      }
-  
-  
-    }
+    // avid5.prototype.remove_action_link = function() {
+    //  
+    //  
+    //   if(this.actionLink !== undefined && this.actionLink.size) {
+    //     this.actionLink.fadeOut('fast');
+    //   }
+    //   
+    //   
+    // }
 
 
 
