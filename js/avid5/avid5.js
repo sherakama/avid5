@@ -69,7 +69,7 @@
        
       ,is_html5_enabled: function() {
         
-        return false;
+        // return false;
         
         var is_mobile = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || false;
         
