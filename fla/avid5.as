@@ -24,7 +24,6 @@ var instanceID = paramObj['instanceID'];
 var timer:Timer = new Timer(30); // 30fps ?
 var delayTimer:Timer = new Timer(randomNumber(1,10) * 1000, 1);
 
-
 timer.addEventListener(TimerEvent.TIMER, process_loop_play); 
 
 // Demo
@@ -71,6 +70,8 @@ mc.addEventListener(MouseEvent.CLICK, mc_click);
 
 
 
+
+
 // Load Video
 // -------------------------------------------------------------------------------------------------------------
 
@@ -94,9 +95,10 @@ function onStatusEvent(e:NetStatusEvent) {
   
   var op = e.info.code;
   var loop_start = paramObj['video_loop_start'];
-
-  trace(op);
-
+  
+/*  var dq:String = ExternalInterface.call("$.avid5.flash_debug('OP: " + op + "')", 1);
+  var dbug:URLRequest = new URLRequest(dq);
+*/
   // Autoplay handler
   if(op == "NetStream.Play.Start") {
    
@@ -113,22 +115,25 @@ function onStatusEvent(e:NetStatusEvent) {
   }
 
   // create loop
-  if(op == "NetStream.Buffer.Empty" || op == "NetStream.Play.Stop") {
-      
+/*  if(op == "NetStream.Buffer.Empty" || op == "NetStream.Buffer.Flush") {  
     // go back to start
     ns.seek(0);
     ns.pause();
-
     delay_playback();        
   }
+*/
 
-
+  // Full play through rewind
+  if(op == "NetStream.Play.Stop") {
+    ns.seek(0);
+    ns.pause();
+    delay_playback();
+  }
+  
+  // Create loop with seek
   if(op == "NetStream.Seek.Notify") {
     timer.stop();
-    timer.removeEventListener(TimerEvent.TIMER, process_loop_play); 
-    delayTimer.removeEventListener(TimerEvent.TIMER, delayTimerListener);
-    delayTimer.stop();
-    
+    delayTimer.stop();    
     delay_playback();
   }
 
@@ -140,8 +145,12 @@ function onStatusEvent(e:NetStatusEvent) {
 function delay_playback() {
   
   //Stop a timer to track the position of the the video file
-  timer.removeEventListener(TimerEvent.TIMER, process_loop_play); 
   timer.stop();
+  timer.removeEventListener(TimerEvent.TIMER, process_loop_play); 
+
+  // Kill any existing timer
+  delayTimer.stop();
+  delayTimer.removeEventListener(TimerEvent.TIMER, delayTimerListener);  
   
   // create a delay for the callback based off a random interval
   delayTimer = new Timer(randomNumber(1,10) * 1000, 1);
@@ -195,9 +204,9 @@ function ns_onMetaData(item:Object):void {
  
  
 function ns_onCuePoint(item:Object):void {
- trace("cuePoint");
+/* trace("cuePoint");
  trace(item.name + "\t" + item.time);
-}
+*/}
 
 
 
@@ -210,7 +219,7 @@ function ns_onCuePoint(item:Object):void {
 
 function process_loop_play(e:TimerEvent) {
   
-  trace("running" + ns.time);
+  // trace("running" + ns.time);
   
   var loop_end = paramObj['video_loop_end'];
   var loop_start = paramObj['video_loop_start'];

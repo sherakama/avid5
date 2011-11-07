@@ -186,6 +186,15 @@
         
       }
       
+      
+      /**
+      * DEBUG - FLASH EXTERNAL CALLBACK
+      **/
+      
+      ,flash_debug: function(msg) {
+        console.log(msg);
+      }
+      
     };
     
 
