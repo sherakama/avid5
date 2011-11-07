@@ -73,9 +73,7 @@
         
         var is_mobile = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || false;
         
-        var has_flash = this.is_flash_enabled();
-        
-        
+        // var has_flash = this.is_flash_enabled();
         // var log = $("#log");
         // var logtext = '';
         // logtext += "has canvas: " + Modernizr.canvas + "\n";
@@ -87,8 +85,6 @@
         // logtext += "version: " + $.browser.version + "\n";
         // logtext += "is ios: " + is_mobile + "\n";
         // log.val(logtext);
-        // 
-        
         
         if(is_mobile !== false) {
           return false; // mobile does not have enough power to go from video to canvas :(
@@ -130,12 +126,19 @@
        
       ,is_flash_enabled: function() {
                 
-        if(swfobject == undefined) {
-          alert('Please Install SWFObject 2 or later');
-        }
-        
+        if(swfobject == undefined) { alert('Please Install SWFObject 2 or later'); }        
         var version = swfobject.getFlashPlayerVersion();
-                                
+  
+        // var logval = $("#log").val();
+        // logval += "Flash version: " + version.major + "\n";
+        // $("#log").val(logval);
+        
+        // If android roll with flash
+        if(navigator.userAgent.match(/Android/i)) {
+          return true;
+        }
+  
+        
         if(version.major >= 9) {
           return true;
         }
