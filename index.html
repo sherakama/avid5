@@ -31,14 +31,13 @@
         {
           videos: { 
              0 : { path: "media/compressed.webm", codec: "video/webm" }
-            ,1 : { path: "media/compressed.ogv", codec: "video/ogg" }
-            ,2 : { path: "media/compressed.mp4", codec: "video/mp4" }
+            ,1 : { path: "media/compressed.mp4", codec: 'video/mp4;' }
+            ,2 : { path: "media/compressed.ogv", codec: "video/ogg" }
           }
           ,width: 480
           ,height: 244
-          ,video_loop_end: 1000
-          ,video_loop_start: 500 
-          ,autoplay: true
+          ,video_loop_end: 4000
+          ,video_loop_start: 0
           ,callback: function() {
               alert('click');
             }
@@ -53,13 +52,13 @@
         {
           videos: { 
              0 : { path: "media/compressed.ogv", codec: "video/ogg" }
-            ,1 : { path: "media/compressed.webm", codec: "video/webm" }
-            ,2 : { path: "media/compressed.mp4", codec: "video/mp4" }
+            ,1 : { path: "media/compressed.webm", codec: "video/webm" } // place webm before h264
+            ,2 : { path: "media/compressed.mp4", codec: 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"' }
           }
           ,width: 480
           ,height: 244
-          ,video_loop_end: 2000
-          ,video_loop_start: 0
+          ,video_loop_end: 3000
+          ,video_loop_start: 800
           ,callback: function() {
             $("#vid2").css({border: "dashed 2px #FF00FF"});
             $("#vid2").animate({left: "-150px"}, 2000);
@@ -74,14 +73,14 @@
       $("#vid3").avid5(
         {
           videos: { 
-             0 : { path: "media/compressed.mp4", codec: "video/mp4" }
-            ,1 : { path: "media/compressed.webm", codec: "video/webm" }
+             0 : { path: "media/compressed.webm", codec: "video/webm" } // place webm first
+            ,1 : { path: "media/compressed.mp4", codec: "video/mp4" }
             ,2 : { path: "media/compressed.ogv", codec: "video/ogg" }
           }
           ,width: 480
           ,height: 244
           ,video_loop_end: 4000
-          ,video_loop_start: 0
+          ,video_loop_start: 2000
         }
       );
     
@@ -110,7 +109,7 @@
         <div id="vid1" class="avid5">
           <img src="img/one.png" width="480" height="244" alt="this is my alt" title="this is my title" />
         </div>
-      
+
         <div id="vid2" class="avid5">
           <img src="img/two.png" width="480" height="244"  alt="this is my alt" title="this is my title" />
         </div>

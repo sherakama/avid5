@@ -61,6 +61,7 @@
       ,has_webm: Modernizr.video.webm 
       ,instance_count: 0 // simple counter
       ,instance_container: new Array() // container for the instances (TODO)
+      ,webm_alert: 0
       
       /**
        * validates the browser for canvas and video capabilities
@@ -68,48 +69,55 @@
        **/
        
       ,is_html5_enabled: function() {
-                
+                                
         var is_mobile = navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || false;
         
         // var has_flash = this.is_flash_enabled();
-        // var log = $("#log");
-        // var logtext = '';
-        // logtext += "has canvas: " + Modernizr.canvas + "\n";
-        // logtext += "has has_h264: " + Modernizr.video.h264 + "\n";
-        // logtext += "has has_ogg: " + Modernizr.video.ogg + "\n";
-        // logtext += "has webm: " + Modernizr.video.webm + "\n";
-        // logtext += "has flash: " + has_flash + "\n";
-        // logtext += "is safari: " + $.browser.safari + "\n";
-        // logtext += "version: " + $.browser.version + "\n";
-        // logtext += "is ios: " + is_mobile + "\n";
-        // log.val(logtext);
+        //        var log = $("#log");
+        //        var logtext = '';
+        //        logtext += "has canvas: " + Modernizr.canvas + "\n";
+        //        logtext += "has has_h264: " + Modernizr.video.h264 + "\n";
+        //        logtext += "has has_ogg: " + Modernizr.video.ogg + "\n";
+        //        logtext += "has webm: " + Modernizr.video.webm + "\n";
+        //        logtext += "has flash: " + has_flash + "\n";
+        //        logtext += "is safari: " + $.browser.safari + "\n";
+        //        logtext += "version: " + $.browser.version + "\n";
+        //        logtext += "is ios: " + is_mobile + "\n";
+        //        log.val(logtext);
         
         if(is_mobile !== false) {
           return false; // mobile does not have enough power to go from video to canvas :(
+        }      
+
+        // Prompt ie 9 users for webm
+        if($.browser.msie == true && parseInt($.browser.version) >= 9 && !this.has_webm && $.avid5.webm_alert == 0) {
+          alert('Your broswer has the capability of displaying this content but is missing a plugin. Download it from google here: https://tools.google.com/dlpage/webmmf');
+          $.avid5.webm_alert = 1;
+          return false;
         }
         
         
         // Webkit
-        if(this.has_canvas && (this.has_h264 == "probably" || this.has_h264 == "maybe")) {
+        if(this.has_canvas && (this.has_h264 == "probably")) {
           return true;
         }
         
         // the moz... Gecko
-        if(this.has_canvas && (this.has_ogg == "probably" || this.has_ogg == "maybe")) {
+        if(this.has_canvas && (this.has_ogg == "probably")) {
           return true;
         }
         
         // webm IE 9 and safari (sometimes)
-        if(this.has_canvas && (this.has_webm == "probably" || this.has_webm == "maybe")) {          
+        if(this.has_canvas && (this.has_webm == "probably")) {          
           return true;
         }
         
-        // Prompt ie 9 users for webm
-        if($.browser.msie == true && parseInt($.browser.version) >= 9 && !this.has_webm) {
-          alert('Your broswer has the capability of displaying this content but is missing a plugin. Download it from google here: https://tools.google.com/dlpage/webmmf');
+        // Prompt mac safari users for perian
+        if($.browser.safari == true && !this.has_webm && navigator.platform == "Mac" && $.avid5.webm_alert == 0) {
+          alert('Your broswer has the capability of displaying this content but is missing a plugin. Download it here: http://perian.org/ or here: ');
+          $.avid5.webm_alert = 1;
           return false;
         }
-        
         
         // probably ie
         return false;
@@ -156,16 +164,6 @@
         return this.instance_container[id];
       }
       
-      
-      /**
-      * Removes the action links from view on all items
-      **/
-      
-      // ,remove_action_links: function() {
-      //   $.each(this.instance_container, function(i, v){
-      //     v.remove_action_link();
-      //   });
-      // }
       
       
       /**
@@ -242,7 +240,7 @@
          width : this.options.width + "px" 
          // overflow:"hidden"
         });
-        
+         
         // Add the avid5 class to the main element
         if(!$(this.element).hasClass('avid5')) {
           $(this.element).addClass('avid5');
@@ -305,7 +303,7 @@
      .attr('width', parseInt(this.options.width))
      .attr('preload', 'true')
      // .attr('loop', 'true')
-     // .attr('autoplay', 'true')
+     // .attr('autoplay', 'false')
      .attr('style', "display:none")
      .attr('controls', 'true')
      .attr("id", 'video-' + $.avid5.instance_count)
@@ -314,7 +312,7 @@
       // Create the video sources tags
        $.each(this.options.videos, function(i, v) {
          // create the tag
-         var vidsource = "<source type=\"" + v.codec + "\" src='" + v.path + "' />";       
+         var vidsource = "<source type='" + v.codec + "' src='" + v.path + "' />";       
 
          // add it to the video tag
          video.append(vidsource);  
@@ -332,45 +330,20 @@
          }
 
        });
-      
-           
-     
-     
-     // Only ad an action link and image if there is one
-     // if(this.options.action_img_path.length >= 1) {
-     //       
-     //       var actionLink = $("<a />");
-     //       actionLink.attr('href', this.options.action_url_path)
-     //       .addClass('hidden action-link');
-     // 
-     //       var actionImage = $("<img />");
-     //       actionImage.attr('src', this.options.action_img_path)
-     //       .addClass('action-image');
-     //      
-     //      // nest them
-     //      actionLink.append(actionImage);
-     //       
-     //     }
-
      
      // Add it to the dom!
      var elem = $(this.element)
-     elem.html(''); // clear out whatever is already there
+     elem.empty(); // clear out whatever is already there
      
      elem.append(outputCanvas);
      elem.append(bufferCanvas);
      elem.append(video);
      
-     // If there is an action link then add it
-     // if(actionLink !== undefined) {
-     //   elem.append(actionLink);
-     // }
 
      // store references for use later
      this.outputcanvas = outputCanvas;
      this.buffercanvas = bufferCanvas;
      this.videoelem = video;
-//     this.actionLink = actionLink;
      
      // Start the loop
     this.play_loop(); 
@@ -412,9 +385,6 @@
      var attr = {};
      
      swfobject.embedSWF(this.options.swf_path, id, this.options.width, this.options.height, "9.0.0", '', flashvars, params, attr);
-         
-     
-     
      
    };
 
@@ -430,6 +400,7 @@
       if($.avid5.is_html5_enabled()) {
       
         var video = this.videoelem[0];
+        var instance = this;
         video.instanceID = this.instanceID;
         video.loop_start = this.options.video_loop_start / 1000;
                 
@@ -438,7 +409,7 @@
         if(this.options.autoplay) {
           
           // process first frame
-          video.addEventListener('canplay', this.video_listener_can_play, false);
+          video.addEventListener('canplay', this.video_listener_can_play, false);          
                     
           // Play on ready
           video.addEventListener('canplaythrough', this.video_listener_can_play_through, false);
@@ -456,28 +427,16 @@
 
           }
           
-          
         }
-                
+                                
         // add play listenter to the video
-        video.addEventListener('play', this.video_listener_loop_play, false);
-
-
-        // Firefox doesn't support looping video, so we emulate it this way
-        video.addEventListener('ended', this.video_listener_loop_ended, false);
-        
-        
-       // add pause/stop listenter to the video
-        // video.addEventListener('pause', function() {
-        // }, false);
-        
-        
+        video.addEventListener('play', this.video_listener_loop_play, false);        
         
       } 
       else 
       // Flash Loop --------------------------------------------------------------------
       {
-        // ...
+        // NADA
       }
       
       
@@ -492,12 +451,16 @@
     * When the movie is ready to play a frame
     */
 
-    avid5.prototype.video_listener_can_play = function(){
+    avid5.prototype.video_listener_can_play = function(){      
       var instance = $(this).parent().data('avid5');
-      var video = instance.videoelem[0];
+      var video = instance.videoelem[0];      
+      
+      video.currentFrame = video.loop_start;      
       video.play();
       video.pause();
+            
       video.removeEventListener('canplay', instance.video_listener_can_play_through, false);
+                  
     }
 
 
@@ -506,10 +469,9 @@
   */
   
   avid5.prototype.video_listener_can_play_through = function() {
-    
+        
       var instance = $(this).parent().data('avid5');
       var video = instance.videoelem[0];
-
       video.currentTime = video.loop_start;
       
       // create a random timeout and start the loop again
@@ -519,20 +481,9 @@
       setTimeout(function() { video.play(); }, timeout);
 
       video.removeEventListener('canplaythrough', instance.video_listener_can_play_through, false);
-
   }
 
 
-  /**
-   * Loop sequence end of clip event handler
-   * 
-   **/
-
-    avid5.prototype.video_listener_loop_ended = function() {
-      // Just re loop
-      var instance = $(this).parent().data('avid5');
-      instance.videoelem[0].play();
-    }
 
     /**
     * Loop sequence play event handler
@@ -540,9 +491,12 @@
     **/
     
     avid5.prototype.video_listener_loop_play = function() {
-        // console.log('PLAY');    
-        var instance = $(this).parent().data('avid5');
+        //var instance = $(this).parent().data('avid5');        
+        var instance = $.avid5.get_instance(this.instanceID); // this refers to the video dom element
+
         clearInterval(instance.process_interval);
+        instance.process_interval = null;
+        
         instance.process_interval = setInterval(function() {
           instance.process_frame();
           instance.check_loop();
@@ -555,10 +509,13 @@
      **/
 
      avid5.prototype.video_listener_full_play = function() {
-         // console.log('PLAY FULL');    
          // Setup the process interval again
-         var instance = $(this).parent().data('avid5');
+         // var instance = $(this).parent().data('avid5');
+         var instance = $.avid5.get_instance(this.instanceID);
+       
          clearInterval(instance.process_interval);
+         instance.process_interval = null;
+         
          instance.process_interval = setInterval(function() {
            instance.process_frame();
          }, 35);
@@ -576,6 +533,11 @@
         // console.log('ENDED FULL');    
         var instance = $(this).parent().data('avid5');
         var video = instance.videoelem[0];
+
+        // remove interval
+        var instance = this;        
+        clearInterval(instance.process_interval);      
+        instance.process_interval = null;
                 
         video.pause();
         
@@ -584,7 +546,6 @@
         video.removeEventListener('ended', instance.video_listener_full_ended, false);
         
         // Add in loop portion video listeners
-        video.addEventListener('ended', instance.video_listener_loop_ended, false);
         video.addEventListener('play', instance.video_listener_loop_play, false);
         
         // create a random timeout and start the loop again
@@ -595,28 +556,6 @@
 
       }
 
-
-    /**
-    * Default click on the video callback action. Called after a delay
-    * fades in action item
-    **/
-
-    // avid5.prototype.click_action_default_callback = function() {
-    //   //console.log('DO CALLBACK');    
-    // 
-    //   // Make sure there is something to work on
-    //   if(this.actionLink == undefined) { return ; }
-    //   
-    //   // Remove all other action links
-    //   $.avid5.remove_action_links(this);
-    //   
-    //   // Kill all actions on the action link, then fade it in.
-    //   this.actionLink.stop().removeClass('hidden').hide().fadeIn('slow');
-    //   
-    //    
-    // }
-      
-      
       
     /**
     * Default click on the video callback action. Called after a delay
@@ -624,10 +563,7 @@
     **/
 
     avid5.prototype.click_action_extra_callback = function() {
-       //console.log('DO CALLBACK');    
-       
        this.options.callback(); // hehe
-
      }  
 
     /**
@@ -636,32 +572,27 @@
     */
 
     avid5.prototype.process_frame = function () {
-
-      // console.log('PROCESS');
-
+      
       var buffer = this.buffercanvas[0].getContext('2d');
       var output = this.outputcanvas[0].getContext('2d');
       var video = this.videoelem[0];
       var width = this.options.width;
       var height = this.options.height;
 
-      buffer.drawImage(video, 0, 0);
-      
+      buffer.drawImage(video, 0, 0);   
+            
       // this can be done without alphaData, except in Firefox which doesn't like 
       // it when image is bigger than the canvas
       var  image = buffer.getImageData(0, 0, width, height),
       imageData = image.data,
       alphaData = buffer.getImageData(0, height, width, height).data;
-      
-      // console.log(alphaData);          
-                
+                      
       for (var i = 3, len = imageData.length; i < len; i = i + 4) {
         imageData[i] = alphaData[i-1];
-      }
+      }      
 
-     output.putImageData(image, 0, 0, 0, 0, width, height);
+     var success = output.putImageData(image, 0, 0, 0, 0, width, height);
      
-
     }
 
 
@@ -674,17 +605,23 @@
     avid5.prototype.check_loop = function () {
       var video = this.videoelem[0];
       var cur_pos = parseInt(video.currentTime * 1000);
+      
                         
       if(cur_pos >= parseInt(this.options.video_loop_end)) {
         video.pause();
         video.currentTime = this.options.video_loop_start / 1000;
-        // video.play();        
+        // video.play();  
         
+        // remove interval
+        var instance = this;        
+        clearInterval(instance.process_interval);      
+        instance.process_interval = null;
+                
         // create a random timeout and start the loop again
         var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
             timeout *= 1000;
                 
-        setTimeout(function() { video.play(); }, timeout);        
+        setTimeout(function() { video.play(); }, timeout);              
       }
       
     }
@@ -711,9 +648,10 @@
         
         // remove the loop intervals and video events        
         clearInterval(instance.process_interval);
+        instance.process_interval = null;
         
         // Remove the loop event handlers
-        video.removeEventListener('ended', instance.video_listener_loop_ended, false);        
+        //video.removeEventListener('ended', instance.video_listener_loop_ended, false);        
         video.removeEventListener('play', instance.video_listener_loop_play, false);
 
         // Add in the playthrough!
