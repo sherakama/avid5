@@ -8,31 +8,10 @@
 .avid5 {
   position: relative;
   margin-bottom: 100px;
-  overflow:hidden;
 }
 
 .avid5 canvas {
  cursor: pointer;
- 
- 
-/* background-image: linear-gradient(bottom, rgb(56,56,56) 7%, rgb(170,173,173) 52%);
- background-image: -o-linear-gradient(bottom, rgb(56,56,56) 7%, rgb(170,173,173) 52%);
- background-image: -moz-linear-gradient(bottom, rgb(56,56,56) 7%, rgb(170,173,173) 52%);
- background-image: -webkit-linear-gradient(bottom, rgb(56,56,56) 7%, rgb(170,173,173) 52%);
- background-image: -ms-linear-gradient(bottom, rgb(56,56,56) 7%, rgb(170,173,173) 52%);
-
- background-image: -webkit-gradient(
-  linear,
-  left bottom,
-  left top,
-  color-stop(0.07, rgb(56,56,56)),
-  color-stop(0.52, rgb(170,173,173))
- );
- 
- position: absolute;
- top: 0px;
- left: 0px;*/
- 
 }
 
 .avid5 video {
@@ -41,7 +20,6 @@
   left: 100%;
   z-index: -1;
 }
-
 
 .avid5 .buffer-canvas {
  position: absolute;
