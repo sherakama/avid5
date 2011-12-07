@@ -293,7 +293,7 @@
      // Buffer canvas for video processing
      var bufferCanvas = $("<canvas />");
      bufferCanvas.addClass('buffer-canvas')
-     .attr('style', 'display:none')
+     // .attr('style', 'display:none')
      .attr('height', parseInt(this.options.height * 2))
      .attr('width', parseInt(this.options.width));
      
@@ -301,10 +301,11 @@
      var video = $("<video />");
      video.attr('height', parseInt(this.options.height * 2))
      .attr('width', parseInt(this.options.width))
-     .attr('preload', 'true')
+     .attr('preload', 'auto')
+     .attr('muted', 'muted')
      // .attr('loop', 'true')
-     // .attr('autoplay', 'false')
-     .attr('style', "display:none")
+     // .attr('autoplay', 'autoplay')
+     // .attr('style', "display:none")
      .attr('controls', 'true')
      .attr("id", 'video-' + $.avid5.instance_count)
      .attr('class', 'video');
@@ -344,12 +345,12 @@
      this.outputcanvas = outputCanvas;
      this.buffercanvas = bufferCanvas;
      this.videoelem = video;
-     
-     // Start the loop
-    this.play_loop(); 
     
     // Event Handlers
-    this.html5_setup_event_handlers();
+    this.html5_setup_event_handlers();    
+     
+    // Start the loop
+    this.play_loop();
      
    };
    
@@ -409,10 +410,12 @@
         if(this.options.autoplay) {
           
           // process first frame
-          video.addEventListener('canplay', this.video_listener_can_play, false);          
+         video.addEventListener('canplay', this.video_listener_can_play, false);          
                     
           // Play on ready
           video.addEventListener('canplaythrough', this.video_listener_can_play_through, false);
+          
+          
           
           
         } else {
@@ -446,7 +449,6 @@
 // HTML 5 Specific
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
     /**
     * When the movie is ready to play a frame
     */
@@ -458,8 +460,13 @@
       video.currentFrame = video.loop_start;      
       video.play();
       video.pause();
+      
+      // for safari force a redraw
+      if($.browser.safari == true) {
+        $(this.element).find('canvas').css({padding:"0px"});
+      }
             
-      video.removeEventListener('canplay', instance.video_listener_can_play_through, false);
+      video.removeEventListener('canplay', instance.video_listener_can_play, false);
                   
     }
 
@@ -469,14 +476,14 @@
   */
   
   avid5.prototype.video_listener_can_play_through = function() {
-        
+                
       var instance = $(this).parent().data('avid5');
       var video = instance.videoelem[0];
       video.currentTime = video.loop_start;
       
       // create a random timeout and start the loop again
       var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
-          timeout *= 1000;
+      timeout *= 1000;
 
       setTimeout(function() { video.play(); }, timeout);
 
@@ -550,7 +557,7 @@
         
         // create a random timeout and start the loop again
         var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
-            timeout *= 1000;
+        timeout *= 1000;
                 
         setTimeout(function() { video.play(); }, timeout);
 
@@ -578,9 +585,18 @@
       var video = this.videoelem[0];
       var width = this.options.width;
       var height = this.options.height;
-
+      // 
+      // buffer.save();
+      // buffer.restore();
       buffer.drawImage(video, 0, 0);   
-            
+      
+      
+      // for safari force a redraw
+      if($.browser.safari == true) {
+        $(this.element).find('canvas').css({padding:"0px"});
+      }
+      
+      
       // this can be done without alphaData, except in Firefox which doesn't like 
       // it when image is bigger than the canvas
       var  image = buffer.getImageData(0, 0, width, height),
@@ -619,7 +635,7 @@
                 
         // create a random timeout and start the loop again
         var timeout = Math.floor(Math.random() * (10 - 1 + 1)) + 1; // between 1 and 10 seconds
-            timeout *= 1000;
+        timeout *= 1000;
                 
         setTimeout(function() { video.play(); }, timeout);              
       }
@@ -634,24 +650,25 @@
     
     avid5.prototype.html5_setup_event_handlers = function() {
             
-     var outputCanvas = this.outputcanvas[0];
-               
+      var outputCanvas = this.outputcanvas[0];
+      
+      
       // CANVAS CLICK HANDLING
       this.outputcanvas.click(function(e){
         e.preventDefault();
         
-        var instance = $(this).parent().data('avid5');               
-        var video = instance.videoelem[0];      
+        var instance = $(this).parent().data('avid5');
+        var video = instance.videoelem[0];
         
         // temporarily pause the video
         video.pause();
         
-        // remove the loop intervals and video events        
+        // remove the loop intervals and video events
         clearInterval(instance.process_interval);
         instance.process_interval = null;
         
         // Remove the loop event handlers
-        //video.removeEventListener('ended', instance.video_listener_loop_ended, false);        
+        //video.removeEventListener('ended', instance.video_listener_loop_ended, false);
         video.removeEventListener('play', instance.video_listener_loop_play, false);
 
         // Add in the playthrough!
@@ -676,23 +693,14 @@
       
           
       
-      // ACTION LINK CLICK HANDLING
-      // if(this.actionLink !== undefined) {        
-      //         // DISABLE THE CLICK IF # is the url
-      //         if(this.options.action_url_path == "#") {
-      //           this.actionLink.click(function(e){
-      //               e.preventDefault();
-      //           });
-      //         }
-      //       }
        
       
     }
 
 // Flash Specific
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
   
+  // Nothing to see here.
   
   
   
@@ -704,35 +712,11 @@
       
       var instance = this;
       
-      
-      // Only ad an action link and image if there is one
-       // if(this.options.action_img_path.length >= 1) {
-       // 
-       //   var actionLink = $("<a />");
-       //   actionLink.attr('href', this.options.action_url_path)
-       //   .addClass('hidden action-link');
-       // 
-       //   var actionImage = $("<img />");
-       //   actionImage.attr('src', this.options.action_img_path)
-       //   .addClass('action-image');
-       // 
-       //  // nest them
-       //  actionLink.append(actionImage);
-       //  
-       //  this.actionLink = actionLink;
-       //  $(this.element).append(actionLink);
-       // 
-       // }
-      
-      
-      
-      
       $(this.element).click(function() {
         
         // action event handling. Call the default and extra callback after the delay
         setTimeout(
           function() {
-            // instance.click_action_default_callback();
             instance.click_action_extra_callback();
           }, 
           instance.options.action_callback_delay
@@ -742,21 +726,6 @@
       
       
     }
-
-
-    /**
-    * Add the default event handlers from user interaction (hover/click)
-    **/
-
-    // avid5.prototype.remove_action_link = function() {
-    //  
-    //  
-    //   if(this.actionLink !== undefined && this.actionLink.size) {
-    //     this.actionLink.fadeOut('fast');
-    //   }
-    //   
-    //   
-    // }
 
 
 

@@ -30,12 +30,12 @@
       $("#vid1").avid5(
         {
           videos: { 
-             0 : { path: "media/compressed.webm", codec: "video/webm" }
-            ,1 : { path: "media/compressed.mp4", codec: 'video/mp4;' }
-            ,2 : { path: "media/compressed.ogv", codec: "video/ogg" }
+             0 : { path: "media/stress.mp4", codec: 'video/mp4;' }
+            ,1 : { path: "media/stress.webm", codec: "video/webm" }
+            ,2 : { path: "media/stress.ogv", codec: "video/ogg" }
           }
-          ,width: 480
-          ,height: 244
+          ,width: 108
+          ,height: 180
           ,video_loop_end: 4000
           ,video_loop_start: 0
           ,callback: function() {
@@ -43,20 +43,17 @@
             }
           ,swf_video_path: "/mindcheck_plugin/media/compressed2.flv" // relative to swf file
         }
-      );
+      );      
       
-      
-      
-      
-      $("#vid2").avid5(
+     $("#vid2").avid5(
         {
           videos: { 
-             0 : { path: "media/compressed.ogv", codec: "video/ogg" }
-            ,1 : { path: "media/compressed.webm", codec: "video/webm" } // place webm before h264
-            ,2 : { path: "media/compressed.mp4", codec: 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"' }
+             0 : { path: "media/stress.mp4", codec: 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"' }
+            ,1 : { path: "media/stress.ogv", codec: "video/ogg" }
+            ,2 : { path: "media/stress.webm", codec: "video/webm" }
           }
-          ,width: 480
-          ,height: 244
+          ,width: 108
+          ,height: 180
           ,video_loop_end: 3000
           ,video_loop_start: 800
           ,callback: function() {
@@ -66,29 +63,31 @@
           ,swf_video_path: "/mindcheck_plugin/media/compressed.mp4" // relative to swf file
         }
       );
-    
-    
-    
-    
+
+
+
+
       $("#vid3").avid5(
         {
           videos: { 
-             0 : { path: "media/compressed.webm", codec: "video/webm" } // place webm first
-            ,1 : { path: "media/compressed.mp4", codec: "video/mp4" }
-            ,2 : { path: "media/compressed.ogv", codec: "video/ogg" }
+             0 : { path: "media/stress.webm", codec: "video/webm" }
+            ,1 : { path: "media/stress.mp4", codec: "video/mp4" }
+            ,2 : { path: "media/stress.ogv", codec: "video/ogg" }
           }
-          ,width: 480
-          ,height: 244
+          ,width: 108
+          ,height: 180
           ,video_loop_end: 4000
           ,video_loop_start: 2000
         }
       );
-    
-      
+
+
       //$("#vid1").data('avid5').videoelem[0].play();
-      
-    
-     });
+
+
+    });
+
+
 
     
     
@@ -102,8 +101,7 @@
   <div id="container">
 
     <div id="main" role="main">
-      
-      
+            
       <!-- <textarea name="lo" rows="8" cols="40" id="log"></textarea> -->
       
         <div id="vid1" class="avid5">
@@ -111,12 +109,13 @@
         </div>
 
         <div id="vid2" class="avid5">
-          <img src="img/two.png" width="480" height="244"  alt="this is my alt" title="this is my title" />
+          <img src="img/two.png" width="480" height="244" id="img2" alt="this is my alt" title="this is my title" />
         </div>
 
         <div id="vid3" class="avid5">
           <img src="img/three.png" width="480" height="244"  alt="this is my alt" title="this is my title" />
         </div>
+      
       
     </div>
 
