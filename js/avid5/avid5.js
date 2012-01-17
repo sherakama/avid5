@@ -38,7 +38,7 @@
           ,swf_path               : 'js/avid5/swf/video_player.swf'
           ,swf_video_path         : ''
           // ,action_img_path        : '' 
-          ,action_url_path        : '#' 
+          ,play_on_click          : true 
           ,autoplay               : true // play the looping portion of the video automatically
           ,video_loop_start       : 0 // in milliseconds
           ,video_loop_end         : 5000 // in miliseconds
@@ -266,7 +266,7 @@
        {
         
         // Sad face   :( 
-        this.image_fallback_handlers();
+        this.default_event_handlers();
        }
        
        
@@ -674,10 +674,12 @@
     avid5.prototype.html5_setup_event_handlers = function() {
             
       var outputCanvas = this.outputcanvas[0];
-      
+      var instance = this;        
+      var event = 'click';
+      if(!instance.options.play_on_click) { event = "mouseover"; }
       
       // CANVAS CLICK HANDLING
-      this.outputcanvas.click(function(e){
+      this.outputcanvas.bind(event, function(e){
         e.preventDefault();
         
         var instance = $(this).parent().data('avid5');
@@ -702,22 +704,20 @@
         video.play();
           
         // action event handling. Call the default and extra callback after the delay
-        setTimeout(
-          function() {
-            // instance.click_action_default_callback();
-            instance.click_action_extra_callback();
-          }, 
-          instance.options.click_callback_delay
-        );  
-        
-        
+        if(event !== "click") {
+         setTimeout(
+            function() {
+              // instance.click_action_default_callback();
+              instance.click_action_extra_callback();
+            }, 
+            instance.options.click_callback_delay
+          );
+        }        
           
       });
       
           
-      
-       
-      
+      this.default_event_handlers();
     }
 
 // Flash Specific
@@ -731,7 +731,7 @@
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     
-    avid5.prototype.image_fallback_handlers = function() {
+    avid5.prototype.default_event_handlers = function() {
       
       var instance = this;
       
@@ -739,10 +739,8 @@
         
         // action event handling. Call the default and extra callback after the delay
         setTimeout(
-          function() {
-            instance.click_action_extra_callback();
-          }, 
-          instance.options.action_callback_delay
+          function() { instance.click_action_extra_callback(); }, 
+          instance.options.click_callback_delay
         );
         
       });
@@ -752,18 +750,14 @@
         
         // action event handling. Call the default and extra callback after the delay
         setTimeout(
-          function() {
-            instance.hover_action_extra_callback();
-          }, 
+          function() {  instance.hover_action_extra_callback(); }, 
           instance.options.hover_callback_delay
         );
         
-      }, funtion() {
+      }, function() {
         
         setTimeout(
-          function() {
-            instance.hover_out_action_extra_callback();
-          }, 
+          function() { instance.hover_out_action_extra_callback(); }, 
           instance.options.hover_callback_delay
         );
         

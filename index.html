@@ -78,8 +78,15 @@
           ,height: 180
           ,video_loop_end: 4000
           ,video_loop_start: 2000
+          ,play_on_click: false // this means play on hover
           ,hover_callback: function() {
-            $("#vid3").css({marginLeft: $("#vid3").css('margin-left') + 1});
+            console.log('HOVER!!!');
+          }
+          ,hover_out_callback: function() {
+            console.log('HOVER OUT!!!');
+          }
+          ,click_callback: function() {
+            console.log('CLICKED ME!!!');
           }
         }
       );
