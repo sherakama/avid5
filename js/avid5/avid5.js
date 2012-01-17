@@ -38,12 +38,15 @@
           ,swf_path               : 'js/avid5/swf/video_player.swf'
           ,swf_video_path         : ''
           // ,action_img_path        : '' 
-          // ,action_url_path        : '#' 
+          ,action_url_path        : '#' 
           ,autoplay               : true // play the looping portion of the video automatically
           ,video_loop_start       : 0 // in milliseconds
           ,video_loop_end         : 5000 // in miliseconds
-          ,action_callback_delay  : 1000 // in milliseconds
-          ,callback               : function() {} // external callback function
+          ,hover_callback_delay   : 1000 // in milliseconds
+          ,click_callback_delay   : 1000 // in milliseconds
+          ,hover_callback         : function() {} // hover callback function
+          ,hover_out_callback     : function() {} // hover callback function
+          ,click_callback         : function() {} // external callback function
        };
 
 
@@ -263,7 +266,7 @@
        {
         
         // Sad face   :( 
-        this.add_default_click_handling();
+        this.image_fallback_handlers();
        }
        
        
@@ -570,8 +573,28 @@
     **/
 
     avid5.prototype.click_action_extra_callback = function() {
-       this.options.callback(); // hehe
+       this.options.click_callback(); // hehe
      }  
+
+
+     /**
+     * Default hover on the video callback action. Called after a delay
+     * fades in action item
+     **/
+
+     avid5.prototype.hover_action_extra_callback = function() {
+        this.options.hover_callback(); // hehe
+      } 
+      
+    /**
+    * Default hover out on the video callback action. Called after a delay
+    * fades in action item
+    **/
+
+    avid5.prototype.hover_out_action_extra_callback = function() {
+       this.options.hover_out_callback(); // hehe
+     }   
+
 
     /**
     * process the video frame and display it on the page
@@ -684,7 +707,7 @@
             // instance.click_action_default_callback();
             instance.click_action_extra_callback();
           }, 
-          instance.options.action_callback_delay
+          instance.options.click_callback_delay
         );  
         
         
@@ -708,7 +731,7 @@
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     
-    avid5.prototype.add_default_click_handling = function() {
+    avid5.prototype.image_fallback_handlers = function() {
       
       var instance = this;
       
@@ -720,6 +743,28 @@
             instance.click_action_extra_callback();
           }, 
           instance.options.action_callback_delay
+        );
+        
+      });
+      
+      
+      $(this.element).hover(function() {
+        
+        // action event handling. Call the default and extra callback after the delay
+        setTimeout(
+          function() {
+            instance.hover_action_extra_callback();
+          }, 
+          instance.options.hover_callback_delay
+        );
+        
+      }, funtion() {
+        
+        setTimeout(
+          function() {
+            instance.hover_out_action_extra_callback();
+          }, 
+          instance.options.hover_callback_delay
         );
         
       });
